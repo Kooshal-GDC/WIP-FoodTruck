@@ -521,7 +521,7 @@ Citizen.CreateThread(function()
 	while true do
 
 		Citizen.Wait(0)
-
+		if PlayerData.job ~= nil and PlayerData.job.name == 'foodtruck' then
 		local playerPed = GetPlayerPed(-1)
 		local coords    = GetEntityCoords(playerPed)
 
@@ -561,6 +561,7 @@ Citizen.CreateThread(function()
 				TriggerEvent('esx_foodtruck:hasExitedEntityZone', LastEntity)
 				LastEntity = nil
 			end
+		end
 		end
 	end
 end)
