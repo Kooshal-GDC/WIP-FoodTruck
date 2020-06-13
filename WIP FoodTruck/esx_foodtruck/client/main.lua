@@ -348,7 +348,6 @@ function OpenMobileFoodTruckActionsMenu()
 
 							menu.close()
 						else
-							local obj, dist = ESX.Game.GetClosestObject({'prop_bbq_5', 'prop_table_para_comb_02', 'prop_table_03_chr'})
 							if CurrentAction ~= nil and CurrentActionData ~= nil then
 								SetEntityAsMissionEntity(CurrentActionData.entity, false, true)
 							  	DeleteObject(CurrentActionData.entity)
