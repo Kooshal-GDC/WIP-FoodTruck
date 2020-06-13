@@ -349,10 +349,15 @@ function OpenMobileFoodTruckActionsMenu()
 							menu.close()
 						else
 							local obj, dist = ESX.Game.GetClosestObject({'prop_bbq_5', 'prop_table_para_comb_02', 'prop_table_03_chr'})
-							if dist < 3.0 then
-								DeleteEntity(obj)
-							else
-								ESX.ShowNotification(_U('clean_too_far'))
+							if CurrentAction ~= nil and CurrentActionData ~= nil then
+								SetEntityAsMissionEntity(CurrentActionData.entity, false, true)
+							  	DeleteObject(CurrentActionData.entity)
+								if CurrentAction == 'foodtruck_client_burger' or CurrentAction == 'foodtruck_client_tacos' then
+									FoodInPlace = nil
+								end
+								CurrentAction = nil
+								CurrentActionData = {}
+								CurrentActionMsg = nil
 							end
 						end
 					end, function(data, menu)
@@ -498,7 +503,16 @@ AddEventHandler('esx_foodtruck:hasEnteredEntityZone', function(entity)
 			CurrentActionMsg  = _U('take') .. ' ' .. _U('tacos')
 			CurrentActionData = {entity = entity, item = 'tacos'}
 		end
-
+		if GetEntityModel(entity) == GetHashKey('prop_table_para_comb_02') then
+			CurrentAction     = 'foodtruck_table'
+			CurrentActionMsg = nil
+			CurrentActionData = {entity = entity}
+		end
+		if GetEntityModel(entity) == GetHashKey('prop_table_03_chr') then
+			CurrentAction     = 'foodtruck_chair'
+			CurrentActionMsg = nil
+			CurrentActionData = {entity = entity}
+		end
 	end
 
 end)
@@ -569,7 +583,8 @@ end)
 -- Key Controls
 Citizen.CreateThread(function()
     while true do
-        Citizen.Wait(0)
+		Citizen.Wait(0)
+		if PlayerData.job ~= nil and PlayerData.job.name == 'foodtruck' then
         if CurrentAction ~= nil then
             SetTextComponentFormat('STRING')
             AddTextComponentString(CurrentActionMsg)
@@ -605,7 +620,8 @@ Citizen.CreateThread(function()
 
                 CurrentAction = nil
             end
-        end
+		end
+		end
 
         if IsControlJustReleased(0, 167) and PlayerData.job ~= nil and PlayerData.job.name == 'foodtruck' then
             OpenMobileFoodTruckActionsMenu()
