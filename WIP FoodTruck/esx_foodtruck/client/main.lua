@@ -114,9 +114,11 @@ function OpenCookingMenu(grill)
 									}, function(food)
 										local id = NetworkGetNetworkIdFromEntity(food)
 										--TriggerServerEvent('esx:clientLog', 'creating entity netID: ' .. tostring(id))
-										TriggerServerEvent('esx_foodtruck:placeFood', id)
+										--TriggerServerEvent('esx_foodtruck:placeFood', id)
 										SetNetworkIdCanMigrate(id, true)
 										FoodInPlace = food
+										DecorRegister("pickedup", 2)
+										DecorSetBool(FoodInPlace, "pickedup", false)
 									end)
 
 									Cooking = false
@@ -560,11 +562,7 @@ Citizen.CreateThread(function()
 		if closestDistance ~= -1 and closestDistance <= 3.0 then
 
  			if LastEntity ~= closestEntity then
- 				TriggerEvent('esx_basicneeds:isEating', function(isEating)
- 					if not isEating then
-						TriggerEvent('esx_foodtruck:hasEnteredEntityZone', closestEntity)
-					end
-				end)
+				TriggerEvent('esx_foodtruck:hasEnteredEntityZone', closestEntity)
 				LastEntity = closestEntity
 			end
 
@@ -610,11 +608,20 @@ Citizen.CreateThread(function()
                     else
                         ESX.ShowNotification(_U('wrong_veh'))
                     end
-                elseif CurrentAction == 'foodtruck_client_burger' or CurrentAction == 'foodtruck_client_tacos' or CurrentAction == 'foodtruck_client_makiriime' then
-                    --TriggerServerEvent('esx_foodtruck:removeFood', CurrentActionData.item)
-                    TriggerServerEvent('esx_foodtruck:addItem', CurrentActionData.item, 1)
-                    ESX.Game.DeleteObject(FoodInPlace)
-                    FoodInPlace = nil
+                elseif CurrentAction == 'foodtruck_client_burger' or CurrentAction == 'foodtruck_client_tacos' then
+					--TriggerServerEvent('esx_foodtruck:removeFood', CurrentActionData.item)
+					--FoodInPlace = nil
+					local food = CurrentActionData.entity
+					if DecorExistOn(food, "pickedup") then
+						local isPickedUp = DecorGetBool(CurrentActionData.entity,"pickedup")
+						if isPickedUp == false then
+							TriggerServerEvent('esx_foodtruck:addItem', CurrentActionData.item, 1)
+							DecorSetBool(CurrentActionData.entity, "pickedup", true)
+							SetEntityAsMissionEntity(CurrentActionData.entity, false, true)
+							DeleteObject(CurrentActionData.entity)
+						end
+					end
+                    
                 end
 
                 CurrentAction = nil
