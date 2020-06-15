@@ -117,6 +117,8 @@ function OpenCookingMenu(grill)
 										--TriggerServerEvent('esx_foodtruck:placeFood', id)
 										SetNetworkIdCanMigrate(id, true)
 										FoodInPlace = food
+										-- for better sync entity/object data
+										-- sync data for only close players
 										DecorRegister("pickedup", 2)
 										DecorSetBool(FoodInPlace, "pickedup", false)
 									end)
@@ -612,7 +614,11 @@ Citizen.CreateThread(function()
 					--TriggerServerEvent('esx_foodtruck:removeFood', CurrentActionData.item)
 					--FoodInPlace = nil
 					local food = CurrentActionData.entity
+					-- check if it is a food from grill
 					if DecorExistOn(food, "pickedup") then
+						-- check if it has been picked up
+						-- normally there won't be picked up food to pick up again
+						-- just in case
 						local isPickedUp = DecorGetBool(CurrentActionData.entity,"pickedup")
 						if isPickedUp == false then
 							TriggerServerEvent('esx_foodtruck:addItem', CurrentActionData.item, 1)
