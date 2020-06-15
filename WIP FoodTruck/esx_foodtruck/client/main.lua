@@ -33,8 +33,8 @@ function OpenCookingMenu(grill)
 			}
 		})
 	end
-
-	ESX.UI.Menu.Open('list', GetCurrentResourceName(), 'foodtruck',
+	if not Cooking then
+		ESX.UI.Menu.Open('list', GetCurrentResourceName(), 'foodtruck',
 		elements,
 		function(data, menu)
 			if data.value == 'cook' then
@@ -66,7 +66,10 @@ function OpenCookingMenu(grill)
 								TriggerServerEvent('esx_foodtruck:removeItem', k, v[2])
 							end
 							Cooking = true						
-
+							-- Set grill to being used						
+							if DecorExistOn(grill, "inUse") then
+								DecorSetBool(grill, "inUse", true)
+							end
 							local coords  = GetEntityCoords(grill)
 							local x, y, z = table.unpack(coords)
 
@@ -124,6 +127,8 @@ function OpenCookingMenu(grill)
 									end)
 
 									Cooking = false
+									-- grill free to use again
+									DecorSetBool(grill, "inUse", false)
 								end)
 							end)
 							
@@ -146,6 +151,7 @@ function OpenCookingMenu(grill)
 			CurrentActionMsg  = _U('start_cooking_hint')
 			CurrentActionData = {}
 		end)
+	end
 end
 
 function OpenFoodTruckActionsMenu()
@@ -346,6 +352,10 @@ function OpenMobileFoodTruckActionsMenu()
 									SetEntityHeading(obj, -GetEntityHeading(playerPed))
 								else
 									SetEntityHeading(obj, GetEntityHeading(playerPed))
+								end
+								if data.current.value == 'prop_bbq_5' then
+									DecorRegister("inUse", 2)
+									DecorSetBool(obj, "inUse", false)
 								end
 								PlaceObjectOnGroundProperly(obj)
 							end)
@@ -597,7 +607,22 @@ Citizen.CreateThread(function()
                 elseif CurrentAction == 'foodtruck_market' then
                     OpenFoodTruckMarketMenu()
                 elseif CurrentAction == 'foodtruck_cook' then
-                    OpenCookingMenu(CurrentActionData.entity)
+                    local grill = CurrentActionData.entity
+							if Cooking == true then
+								ESX.ShowNotification('You are currently cooking')
+							end
+							if DecorExistOn(grill, "inUse") then
+							 	if DecorGetBool(grill, "inUse") == false then
+									OpenCookingMenu(grill)
+							 	else
+									ESX.ShowNotification('The grill is being used')
+							 	end
+							else
+								-- For Existing prop_bbq_5
+							 	DecorRegister("inUse", 2)
+							 	DecorSetBool(grill, "inUse", false)
+								OpenCookingMenu(grill)
+							end
                 elseif CurrentAction == 'delete_vehicle' then
                     local playerPed = GetPlayerPed(-1)
                     local vehicle   = GetVehiclePedIsIn(playerPed,  false)
