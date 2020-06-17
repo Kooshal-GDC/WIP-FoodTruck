@@ -3,10 +3,32 @@ local PlayerData, CurrentActionData = {}, {}
 local LastZone, CurrentAction, CurrentActionMsg, FoodInPlace
 local OnJob, Cooking, HasAlreadyEnteredMarker = false, false, false
 
+
 Citizen.CreateThread(function()
 	while ESX == nil do
 		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 		Citizen.Wait(0)
+	end
+end)
+
+Citizen.CreateThread(function ()
+	while true do
+		if PlayerData.job ~= nil and PlayerData.job.name == 'foodtruck' then
+			if OnJob ~= true then
+				OnJob = true
+				if OnJob == true then
+					StartMarkerDisplay()
+					StartMarkerCheck()
+					StartEntityCheck()
+					StartKeyCheck()
+				end
+			end
+		else
+			if OnJob == true then
+				OnJob = false
+			end
+		end
+		Citizen.Wait(500)
 	end
 end)
 
@@ -453,9 +475,13 @@ Citizen.CreateThread(function()
 end)
 
 -- Display markers
+function StartMarkerDisplay()
 Citizen.CreateThread(function()
 	while true do
-		Wait(0)
+		Citizen.Wait(0)
+		if not OnJob then
+			break
+		end
 		if PlayerData.job ~= nil and PlayerData.job.name == 'foodtruck' then
 			local coords = GetEntityCoords(GetPlayerPed(-1))
 
@@ -467,11 +493,16 @@ Citizen.CreateThread(function()
 		end
 	end
 end)
+end
 
 -- Enter / Exit marker events
+function StartMarkerCheck()
 Citizen.CreateThread(function()
 	while true do
-		Wait(0)
+		Citizen.Wait(0)
+		if not OnJob then
+			break
+		end
 		if PlayerData.job ~= nil and PlayerData.job.name == 'foodtruck' then
 			local coords      = GetEntityCoords(GetPlayerPed(-1))
 			local isInMarker  = false
@@ -494,6 +525,7 @@ Citizen.CreateThread(function()
 		end
 	end
 end)
+end
 
 AddEventHandler('esx_foodtruck:hasEnteredEntityZone', function(entity)
 
@@ -535,6 +567,7 @@ AddEventHandler('esx_foodtruck:hasExitedEntityZone', function(entity)
 end)
 
 -- Enter / Exit entity zone events
+function StartEntityCheck()
 Citizen.CreateThread(function()
 
 	local trackedEntities = {
@@ -548,6 +581,9 @@ Citizen.CreateThread(function()
 	while true do
 
 		Citizen.Wait(0)
+		if not OnJob then
+			break
+		end
 		if PlayerData.job ~= nil and PlayerData.job.name == 'foodtruck' then
 		local playerPed = GetPlayerPed(-1)
 		local coords    = GetEntityCoords(playerPed)
@@ -588,11 +624,16 @@ Citizen.CreateThread(function()
 		end
 	end
 end)
+end
 
 -- Key Controls
+function StartKeyCheck()
 Citizen.CreateThread(function()
     while true do
 		Citizen.Wait(0)
+		if not OnJob then
+			break
+		end
 		if PlayerData.job ~= nil and PlayerData.job.name == 'foodtruck' then
         if CurrentAction ~= nil then
             SetTextComponentFormat('STRING')
@@ -662,6 +703,7 @@ Citizen.CreateThread(function()
 
         if IsControlJustReleased(0, 167) and PlayerData.job ~= nil and PlayerData.job.name == 'foodtruck' then
             OpenMobileFoodTruckActionsMenu()
-        end
+		end
     end
 end)
+end
