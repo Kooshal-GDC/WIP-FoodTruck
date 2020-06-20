@@ -88,10 +88,9 @@ function OpenCookingMenu(grill)
 								TriggerServerEvent('esx_foodtruck:removeItem', k, v[2])
 							end
 							Cooking = true						
-							-- Set grill to being used						
-							if DecorExistOn(grill, "inUse") then
-								DecorSetBool(grill, "inUse", true)
-							end
+							-- Set grill status as being used
+							setGrillOccupied(grill, true)
+
 							local coords  = GetEntityCoords(grill)
 							local x, y, z = table.unpack(coords)
 
@@ -138,19 +137,16 @@ function OpenCookingMenu(grill)
 										z = z + 0.93
 									}, function(food)
 										local id = NetworkGetNetworkIdFromEntity(food)
-										--TriggerServerEvent('esx:clientLog', 'creating entity netID: ' .. tostring(id))
-										--TriggerServerEvent('esx_foodtruck:placeFood', id)
 										SetNetworkIdCanMigrate(id, true)
 										FoodInPlace = food
-										-- for better sync entity/object data
-										-- sync data for only close players
-										DecorRegister("pickedup", 2)
-										DecorSetBool(FoodInPlace, "pickedup", false)
+										-- for better sync entity (using decor instead of syncing network id for all players)
+										-- register food pickedup property
+										registerCookedFood(FoodInPlace)
 									end)
 
 									Cooking = false
-									-- grill free to use again
-									DecorSetBool(grill, "inUse", false)
+									-- set grill free to use again / not occupied
+									setGrillOccupied(grill, false)
 								end)
 							end)
 							
@@ -376,8 +372,8 @@ function OpenMobileFoodTruckActionsMenu()
 									SetEntityHeading(obj, GetEntityHeading(playerPed))
 								end
 								if data.current.value == 'prop_bbq_5' then
-									DecorRegister("inUse", 2)
-									DecorSetBool(obj, "inUse", false)
+									-- register grill usable property
+									registerCookingGrill(obj)
 								end
 								PlaceObjectOnGroundProperly(obj)
 							end)
@@ -596,7 +592,6 @@ Citizen.CreateThread(function()
 			local object = GetClosestObjectOfType(coords.x,  coords.y,  coords.z,  3.0,  GetHashKey(trackedEntities[i]), false, false, false)
 
 			if DoesEntityExist(object) then
-
 				local objCoords = GetEntityCoords(object)
 				local distance  = GetDistanceBetweenCoords(coords.x,  coords.y,  coords.z,  objCoords.x,  objCoords.y,  objCoords.z,  true)
 
@@ -649,21 +644,23 @@ Citizen.CreateThread(function()
                     OpenFoodTruckMarketMenu()
                 elseif CurrentAction == 'foodtruck_cook' then
                     local grill = CurrentActionData.entity
-							if Cooking == true then
-								ESX.ShowNotification('You are currently cooking')
-							end
-							if DecorExistOn(grill, "inUse") then
-							 	if DecorGetBool(grill, "inUse") == false then
-									OpenCookingMenu(grill)
-							 	else
-									ESX.ShowNotification('The grill is being used')
-							 	end
-							else
-								-- For Existing prop_bbq_5
-							 	DecorRegister("inUse", 2)
-							 	DecorSetBool(grill, "inUse", false)
+					if Cooking == true then
+						ESX.ShowNotification('You are currently cooking')
+					else
+						-- check if grill is usable or spawned by someone
+						if isGrillUsable(grill) then
+							-- check if grill is not occupied
+							if not isGrillOccupied(grill) then
 								OpenCookingMenu(grill)
+							else
+								ESX.ShowNotification('The grill is being used')
 							end
+						else
+							-- For grill (prop_bbq_5) spawned by game (if any)
+							-- optional to make it usable
+							ESX.ShowNotification('The grill is not usable')
+						end
+					end
                 elseif CurrentAction == 'delete_vehicle' then
                     local playerPed = GetPlayerPed(-1)
                     local vehicle   = GetVehiclePedIsIn(playerPed,  false)
@@ -677,25 +674,14 @@ Citizen.CreateThread(function()
                         ESX.ShowNotification(_U('wrong_veh'))
                     end
                 elseif CurrentAction == 'foodtruck_client_burger' or CurrentAction == 'foodtruck_client_tacos' then
-					--TriggerServerEvent('esx_foodtruck:removeFood', CurrentActionData.item)
-					--FoodInPlace = nil
 					local food = CurrentActionData.entity
-					-- check if it is a food from grill
-					if DecorExistOn(food, "pickedup") then
-						-- check if it has been picked up
-						-- normally there won't be picked up food to pick up again
-						-- just in case
-						local isPickedUp = DecorGetBool(CurrentActionData.entity,"pickedup")
-						if isPickedUp == false then
-							TriggerServerEvent('esx_foodtruck:addItem', CurrentActionData.item, 1)
-							DecorSetBool(CurrentActionData.entity, "pickedup", true)
-							SetEntityAsMissionEntity(CurrentActionData.entity, false, true)
-							DeleteObject(CurrentActionData.entity)
-						end
+					-- check if it is a food from grill or pickable
+					if isFoodPickable(food) then
+						-- pick up food and remove it
+						TriggerServerEvent('esx_foodtruck:addItem', CurrentActionData.item, 1)
+						PickUpFood(food)
 					end
-                    
                 end
-
                 CurrentAction = nil
             end
 		end
