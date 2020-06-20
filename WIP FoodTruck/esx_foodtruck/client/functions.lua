@@ -54,3 +54,12 @@ function PickUpFood(food)
     SetEntityAsMissionEntity(food, false, true)
 	DeleteObject(food)
 end
+
+function isEntityFood(entity)
+    if GetEntityModel(entity) == GetHashKey('prop_cs_burger_01') then
+        return true
+    elseif GetEntityModel(entity) == GetHashKey('prop_taco_01') then
+        return true
+    end
+    return false
+end

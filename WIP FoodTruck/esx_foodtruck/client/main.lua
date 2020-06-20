@@ -604,9 +604,18 @@ Citizen.CreateThread(function()
 
 		if closestDistance ~= -1 and closestDistance <= 3.0 then
 
- 			if LastEntity ~= closestEntity then
-				TriggerEvent('esx_foodtruck:hasEnteredEntityZone', closestEntity)
-				LastEntity = closestEntity
+			 if LastEntity ~= closestEntity then
+				-- check if entity is a food ( burger / taco )
+				if isEntityFood(closestEntity) then
+					-- check if it is a pickable food ( has pickedup property )
+					if isFoodPickable(closestEntity) then
+						TriggerEvent('esx_foodtruck:hasEnteredEntityZone', closestEntity)
+						LastEntity = closestEntity
+					end
+				else
+					TriggerEvent('esx_foodtruck:hasEnteredEntityZone', closestEntity)
+					LastEntity = closestEntity
+				end
 			end
 
 		else
