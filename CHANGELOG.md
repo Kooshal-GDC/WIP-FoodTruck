@@ -1,5 +1,23 @@
 # Changelog
 
+## [Commit No.14](https://github.com/Kooshal-GDC/WIP-FoodTruck/commit/0b475453d5498dc9d3e9a2cf6a99dc7098c07110) (Jun 20, 2020)
+
+**Fix | Improvement**
+
+- Fix detection of food : only detects food from grill (grill food has a decor value as before)
+- This update will no longer show prompt to pick up food which is not from grill for examples:
+    - food on hand when eating
+    - food on tables at restaurant or anywhere as props
+    - simply food which is not from the grill when a player cooks it
+
+## [Commit No.13](https://github.com/Kooshal-GDC/WIP-FoodTruck/commit/68580a56e088908de627b93367d413dff79a2726) (Jun 20, 2020)
+
+**Refactoring**
+
+- Simplifying the new codes since commit no.4 overall
+- Creation of new functions for grill and food in functions.lua
+- Newly functions have their comments, every code is self-explanatory
+
 ## [Commit No.10](https://github.com/Kooshal-GDC/WIP-FoodTruck/commit/8449da7aa4395a2b96aace391f15c24c8738b68b) (Jun 18, 2020)
 
 **Documentation**
