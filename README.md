@@ -1,8 +1,6 @@
 # 5MDev
 FiveM Dev stuff
 
-[Full Changelog](https://github.com/Kooshal-GDC/WIP-FoodTruck/blob/master/CHANGELOG.md)
-
 ## [Release version 2.0](https://github.com/Kooshal-GDC/WIP-FoodTruck/tree/v2.0.0)
 
 **What's with this?**
