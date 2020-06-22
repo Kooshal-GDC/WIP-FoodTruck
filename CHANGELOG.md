@@ -1,5 +1,23 @@
 # Changelog
 
+## [Release version 2.0](https://github.com/Kooshal-GDC/WIP-FoodTruck/tree/v2.0.0)
+
+**Details**
+
+- Food Related
+    - Food props from grill will have a specific value for better interaction with foodtruck workers
+    - Food props will not duplicate due to overriden variable "FoodInPlace"
+    - Only food spawned by grill is pickable / detectable
+    - Only detectable food props can be cleaned up
+- Grill Releated
+    - Grill prop spawned by player will have a specific value for better interaction with foodtruck workers
+    - Players will not be able to use an occupied grill (cooking menu won't show up)
+    - If a player is cooking, he won't be able to open cooking menu
+    - Only detection grill props can be cleaned up
+- Performance Tweaks
+    - Some threads won't run for non-foodtruck workers
+    - Props detection is only for foodtruck workers
+
 ## [Commit No.14](https://github.com/Kooshal-GDC/WIP-FoodTruck/commit/0b475453d5498dc9d3e9a2cf6a99dc7098c07110) (Jun 20, 2020)
 
 **Fix | Improvement**
